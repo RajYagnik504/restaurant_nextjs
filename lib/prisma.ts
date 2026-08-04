@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import { Pool } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { PrismaNeon } from '@prisma/adapter-neon';
+
+// Configure Neon to use fetch instead of WebSockets to prevent
+// connection drops across Cloudflare Worker request boundaries.
+neonConfig.poolQueryViaFetch = true;
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_FE6kSc0gNLqT@ep-dry-tree-azxde4bc-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
