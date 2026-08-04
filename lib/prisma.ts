@@ -17,6 +17,10 @@ let prisma: PrismaClient;
 if (globalForPrisma.prisma) {
   prisma = globalForPrisma.prisma;
 } else {
+  // Safely inject into process.env so Prisma's schema validator finds it at runtime,
+  // using bracket notation to prevent Webpack DefinePlugin from replacing it.
+  process.env['DATABASE_URL'] = connectionString;
+
   const pool = new Pool({ connectionString });
   const adapter = new PrismaNeon(pool);
   prisma = new PrismaClient({ adapter, log: ['query'] });
