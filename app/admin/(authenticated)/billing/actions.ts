@@ -24,7 +24,7 @@ export async function generateInvoice(orderId: number, discount: number = 0) {
   const total = subtotal + tax - discount;
 
   // Use transaction to ensure data integrity
-  const invoice = await prisma.$transaction(async (tx) => {
+  const invoice = await prisma.$transaction(async (tx: any) => {
     // 1. Create Invoice
     const newInvoice = await tx.invoice.create({
       data: {

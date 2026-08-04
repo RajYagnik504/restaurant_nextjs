@@ -14,7 +14,7 @@ export async function addRawMaterial(formData: FormData) {
   }
 
   // Use a transaction to create the material and the initial log
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: any) => {
     const material = await tx.rawMaterial.create({
       data: {
         name,
@@ -49,7 +49,7 @@ export async function adjustStock(formData: FormData) {
     throw new Error('Invalid input');
   }
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: any) => {
     const material = await tx.rawMaterial.findUnique({
       where: { id: materialId },
     });
