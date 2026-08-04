@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+export const runtime = 'edge';
 
 export const metadata: Metadata = {
   title: "ShivShaktiSystem",

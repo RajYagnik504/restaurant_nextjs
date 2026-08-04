@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { signJwt } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const { mobile, password } = await request.json();
