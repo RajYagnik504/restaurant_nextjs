@@ -17,12 +17,6 @@ let prisma: PrismaClient;
 if (globalForPrisma.prisma) {
   prisma = globalForPrisma.prisma;
 } else {
-  // If connectionString is empty, we must not instantiate the Pool with it,
-  // otherwise it hangs Cloudflare Workers trying to connect to localhost.
-  // Inject the connection string into process.env so that Prisma's internal schema parser
-  // doesn't throw a "Missing DATABASE_URL" error on Edge.
-  process.env.DATABASE_URL = connectionString;
-
   const pool = new Pool({ connectionString });
   const adapter = new PrismaNeon(pool);
   prisma = new PrismaClient({ adapter, log: ['query'] });
