@@ -19,9 +19,17 @@ if (globalForPrisma.prisma) {
 } else {
   // If connectionString is empty, we must not instantiate the Pool with it,
   // otherwise it hangs Cloudflare Workers trying to connect to localhost.
-  const pool = new Pool({ connectionString: connectionString || 'postgres://dummy:dummy@dummy/dummy' });
+  const pool = new Pool({ connectionString });
   const adapter = new PrismaNeon(pool);
-  prisma = new PrismaClient({ adapter, log: ['query'] });
+  prisma = new PrismaClient({ 
+    adapter, 
+    log: ['query'],
+    datasources: {
+      db: {
+        url: connectionString,
+      },
+    },
+  });
   if (process.env.NODE_ENV !== 'production') {
     globalForPrisma.prisma = prisma;
   }
