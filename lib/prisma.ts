@@ -1,15 +1,14 @@
 import { PrismaClient } from '@prisma/client';
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { Pool } from '@neondatabase/serverless';
 import { PrismaNeon } from '@prisma/adapter-neon';
 
-// If we're not running in a browser/edge and we don't have WebSocket globally available
-// (like in standard Node.js Next.js dev server), we provide the ws package to neonConfig
-if (typeof WebSocket === 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  neonConfig.webSocketConstructor = require('ws');
-}
-
 const connectionString = process.env.DATABASE_URL || '';
+
+// In Cloudflare Edge, if connectionString is empty, the Neon driver might fallback
+// to attempting to connect to localhost, which will hang the worker and cause a 522 Error.
+if (!connectionString) {
+  console.error("FATAL: DATABASE_URL environment variable is missing.");
+}
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
@@ -18,7 +17,9 @@ let prisma: PrismaClient;
 if (globalForPrisma.prisma) {
   prisma = globalForPrisma.prisma;
 } else {
-  const pool = new Pool({ connectionString });
+  // If connectionString is empty, we must not instantiate the Pool with it,
+  // otherwise it hangs Cloudflare Workers trying to connect to localhost.
+  const pool = new Pool({ connectionString: connectionString || 'postgres://dummy:dummy@dummy/dummy' });
   const adapter = new PrismaNeon(pool);
   prisma = new PrismaClient({ adapter, log: ['query'] });
   if (process.env.NODE_ENV !== 'production') {
