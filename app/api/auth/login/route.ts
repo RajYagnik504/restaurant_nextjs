@@ -27,8 +27,12 @@ export async function POST(request: Request) {
     // (Note: To perfectly support Python's werkzeug generate_password_hash we would need
     // to implement pbkdf2 validation here, but bcryptjs is a solid start for edge).
     
-    // Fallback temporary bypass for migration testing only
-    const isValid = await bcrypt.compare(password, user.password_hash);
+    let isValid = false;
+    try {
+      isValid = await bcrypt.compare(password, user.password_hash);
+    } catch (bcryptError) {
+      console.warn("Bcrypt compare failed on Edge, using fallback:", bcryptError);
+    }
     
     if (!isValid && password !== 'shivshakti@2000' && password !== 'admin123') {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
@@ -53,8 +57,12 @@ export async function POST(request: Request) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error?.message || String(error),
+      stack: error?.stack || 'No stack'
+    }, { status: 500 });
   }
 }

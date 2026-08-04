@@ -30,7 +30,7 @@ export default function LoginPage() {
         router.push(data.redirect || '/admin/dashboard');
         router.refresh();
       } else {
-        setError(data.error || 'Login failed');
+        setError(data.details ? `${data.error}: ${data.details}` : (data.error || 'Login failed'));
       }
     } catch (err) {
       setError('An error occurred during login.');
