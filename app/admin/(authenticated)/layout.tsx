@@ -46,6 +46,26 @@ export default function AuthenticatedLayout({
           <Link href="/admin/live_orders" className={`nav-link ${pathname === '/admin/live_orders' ? 'active' : ''}`}>
             <i className="fa-solid fa-bell-concierge"></i> Live Orders
           </Link>
+          <Link href="/admin/billing" className={`nav-link ${pathname === '/admin/billing' ? 'active' : ''}`}>
+            <i className="fa-solid fa-cash-register"></i> Billing / POS
+          </Link>
+          <Link href="/admin/invoices" className={`nav-link ${pathname === '/admin/invoices' ? 'active' : ''}`}>
+            <i className="fa-solid fa-file-invoice"></i> Invoices
+          </Link>
+          <Link href="/admin/day_end" className={`nav-link ${pathname === '/admin/day_end' ? 'active' : ''}`}>
+            <i className="fa-solid fa-calendar-check"></i> Day End Report
+          </Link>
+
+          <div className="nav-section">MANAGEMENT</div>
+          <Link href="/admin/categories" className={`nav-link ${pathname === '/admin/categories' ? 'active' : ''}`}>
+            <i className="fa-solid fa-list"></i> Categories
+          </Link>
+          <Link href="/admin/items" className={`nav-link ${pathname === '/admin/items' ? 'active' : ''}`}>
+            <i className="fa-solid fa-burger"></i> Menu Items
+          </Link>
+          <Link href="/admin/tables" className={`nav-link ${pathname === '/admin/tables' ? 'active' : ''}`}>
+            <i className="fa-solid fa-chair"></i> Tables
+          </Link>
           <Link href="/admin/inventory" className={`nav-link ${pathname === '/admin/inventory' ? 'active' : ''}`}>
             <i className="fa-solid fa-boxes-stacked"></i> Inventory
           </Link>
