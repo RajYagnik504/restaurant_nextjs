@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function addItem(formData: FormData) {
@@ -14,7 +14,7 @@ export async function addItem(formData: FormData) {
     throw new Error('Invalid input');
   }
 
-  await prisma.menuItem.create({
+  await getPrisma().menuItem.create({
     data: { 
       name, 
       description, 
@@ -29,7 +29,7 @@ export async function addItem(formData: FormData) {
 }
 
 export async function toggleItemAvailability(id: number, currentStatus: boolean) {
-  await prisma.menuItem.update({
+  await getPrisma().menuItem.update({
     where: { id },
     data: { is_available: !currentStatus },
   });
@@ -38,7 +38,7 @@ export async function toggleItemAvailability(id: number, currentStatus: boolean)
 }
 
 export async function deleteItem(id: number) {
-  await prisma.menuItem.delete({
+  await getPrisma().menuItem.delete({
     where: { id },
   });
   

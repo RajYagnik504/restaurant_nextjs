@@ -1,34 +1,18 @@
 import { PrismaClient } from '@prisma/client';
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { Pool } from '@neondatabase/serverless';
 import { PrismaNeon } from '@prisma/adapter-neon';
 
-// Configure Neon to use fetch instead of WebSockets to prevent
-// connection drops across Cloudflare Worker request boundaries.
-neonConfig.poolQueryViaFetch = true;
+// On Cloudflare Pages (Edge runtime), WebSocket connections cannot outlive a single request.
+// Therefore, we MUST instantiate the Pool and PrismaClient for every request to avoid
+// state loss that results in "No database host or connection string was set" errors.
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_FE6kSc0gNLqT@ep-dry-tree-azxde4bc-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
-
-// In Cloudflare Edge, if connectionString is empty, the Neon driver might fallback
-// to attempting to connect to localhost, which will hang the worker and cause a 522 Error.
-if (!connectionString) {
-  console.error("FATAL: DATABASE_URL environment variable is missing.");
-}
-
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-let prisma: PrismaClient;
-
-if (globalForPrisma.prisma) {
-  prisma = globalForPrisma.prisma;
-} else {
+export function getPrisma() {
   const connectionString = 'postgresql://neondb_owner:npg_FE6kSc0gNLqT@ep-dry-tree-azxde4bc-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+  
+  // Optional: prevent schema parsing errors
   process.env.DATABASE_URL = connectionString;
+  
   const pool = new Pool({ connectionString });
   const adapter = new PrismaNeon(pool);
-  prisma = new PrismaClient({ adapter, log: ['query'] });
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = prisma;
-  }
+  return new PrismaClient({ adapter, log: ['warn', 'error'] });
 }
-
-export { prisma };

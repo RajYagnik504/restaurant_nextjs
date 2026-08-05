@@ -1,11 +1,11 @@
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 
 export default async function DashboardPage() {
   // Fetch high-level stats from Prisma
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const totalOrders = await prisma.order.count({
+  const totalOrders = await getPrisma().order.count({
     where: {
       created_at: {
         gte: today,
@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     }
   });
 
-  const totalSales = await prisma.invoice.aggregate({
+  const totalSales = await getPrisma().invoice.aggregate({
     _sum: {
       total: true,
     },

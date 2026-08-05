@@ -1,13 +1,13 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function generateDayEndReport() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const invoices = await prisma.invoice.findMany({
+  const invoices = await getPrisma().invoice.findMany({
     where: {
       created_at: { gte: today },
     },

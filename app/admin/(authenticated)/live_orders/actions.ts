@@ -1,10 +1,10 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function fetchLiveOrders() {
-  const activeOrders = await prisma.order.findMany({
+  const activeOrders = await getPrisma().order.findMany({
     where: {
       status: {
         notIn: ['completed', 'cancelled'],
@@ -27,7 +27,7 @@ export async function fetchLiveOrders() {
 }
 
 export async function updateOrderStatus(orderId: number, status: string) {
-  await prisma.order.update({
+  await getPrisma().order.update({
     where: { id: orderId },
     data: { status },
   });

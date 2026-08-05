@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { signJwt } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Mobile and password are required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await getPrisma().user.findUnique({
       where: { mobile },
     });
 

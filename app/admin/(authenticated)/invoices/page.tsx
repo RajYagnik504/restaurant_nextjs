@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import Link from 'next/link';
 
 export default async function InvoicesPage() {
-  const invoices = await prisma.invoice.findMany({
+  const invoices = await getPrisma().invoice.findMany({
     orderBy: { created_at: 'desc' },
     take: 100, // Limit to recent 100 for performance
   });

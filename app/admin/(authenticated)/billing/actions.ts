@@ -1,10 +1,10 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function generateInvoice(orderId: number, discount: number = 0) {
-  const order = await prisma.order.findUnique({
+  const order = await getPrisma().order.findUnique({
     where: { id: orderId },
     include: {
       items: { include: { menu_item: true } },
@@ -24,7 +24,7 @@ export async function generateInvoice(orderId: number, discount: number = 0) {
   const total = subtotal + tax - discount;
 
   // Use transaction to ensure data integrity
-  const invoice = await prisma.$transaction(async (tx: any) => {
+  const invoice = await getPrisma().$transaction(async (tx: any) => {
     // 1. Create Invoice
     const newInvoice = await tx.invoice.create({
       data: {

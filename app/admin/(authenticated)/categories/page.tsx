@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import CategoriesClient from './CategoriesClient';
 
 export default async function CategoriesPage() {
-  const categories = await prisma.category.findMany({
+  const categories = await getPrisma().category.findMany({
     orderBy: { name: 'asc' },
   });
 

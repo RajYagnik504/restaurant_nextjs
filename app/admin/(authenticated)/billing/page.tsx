@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import BillingClient from './BillingClient';
 
 export default async function BillingPage() {
-  const activeOrders = await prisma.order.findMany({
+  const activeOrders = await getPrisma().order.findMany({
     where: {
       status: { not: 'completed' }, // Typically we bill orders that are 'served' or 'received', but not completed.
     },

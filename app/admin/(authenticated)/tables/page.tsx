@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import TablesClient from './TablesClient';
 
 export default async function TablesPage() {
-  const tables = await prisma.table.findMany({
+  const tables = await getPrisma().table.findMany({
     orderBy: { table_number: 'asc' },
   });
 

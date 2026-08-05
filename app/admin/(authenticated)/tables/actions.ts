@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function addTable(formData: FormData) {
@@ -10,7 +10,7 @@ export async function addTable(formData: FormData) {
 
   if (isNaN(table_number)) throw new Error('Table number is required');
 
-  await prisma.table.create({
+  await getPrisma().table.create({
     data: { table_number, seats, status },
   });
 
@@ -18,7 +18,7 @@ export async function addTable(formData: FormData) {
 }
 
 export async function deleteTable(id: number) {
-  await prisma.table.delete({
+  await getPrisma().table.delete({
     where: { id },
   });
   

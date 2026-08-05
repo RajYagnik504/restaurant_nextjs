@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export async function addCategory(formData: FormData) {
@@ -9,7 +9,7 @@ export async function addCategory(formData: FormData) {
 
   if (!name) throw new Error('Category name is required');
 
-  await prisma.category.create({
+  await getPrisma().category.create({
     data: { name, description },
   });
 
@@ -17,7 +17,7 @@ export async function addCategory(formData: FormData) {
 }
 
 export async function deleteCategory(id: number) {
-  await prisma.category.delete({
+  await getPrisma().category.delete({
     where: { id },
   });
   
