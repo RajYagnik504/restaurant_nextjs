@@ -3,83 +3,71 @@
 import { getPrisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-export async function addRawMaterial(formData: FormData) {
-  const name = formData.get('name') as string;
-  const unit = formData.get('unit') as string;
-  const initialStock = parseFloat(formData.get('initial_stock') as string) || 0;
-  const threshold = parseFloat(formData.get('low_stock_threshold') as string) || 10;
-
-  if (!name || !unit) {
-    throw new Error('Name and unit are required');
-  }
-
-  // Use a transaction to create the material and the initial log
-  await getPrisma().$transaction(async (tx: any) => {
-    const material = await tx.rawMaterial.create({
-      data: {
-        name,
-        unit,
-        current_stock: initialStock,
-        low_stock_threshold: threshold,
-      },
-    });
-
-    if (initialStock > 0) {
-      await tx.inventoryLog.create({
-        data: {
-          raw_material_id: material.id,
-          type: 'add',
-          quantity: initialStock,
-          reason: 'Initial stock entry',
-        },
-      });
-    }
+export async function fetchInventory() {
+  const prisma = getPrisma();
+  
+  const items = await prisma.rawMaterial.findMany({
+    orderBy: { name: 'asc' }
   });
 
-  revalidatePath('/admin/inventory');
+  const logs = await prisma.inventoryLog.findMany({
+    orderBy: { created_at: 'desc' },
+    take: 30,
+    include: { raw_material: true, user: true }
+  });
+
+  return { items, logs };
 }
 
-export async function adjustStock(formData: FormData) {
-  const materialId = parseInt(formData.get('material_id') as string);
-  const type = formData.get('type') as string; // 'add' or 'deduct'
-  const quantity = parseFloat(formData.get('quantity') as string) || 0;
-  const reason = formData.get('reason') as string || '';
-
-  if (!materialId || quantity <= 0) {
-    throw new Error('Invalid input');
-  }
-
-  await getPrisma().$transaction(async (tx: any) => {
-    const material = await tx.rawMaterial.findUnique({
-      where: { id: materialId },
-    });
-
-    if (!material) throw new Error('Material not found');
-
-    let newStock = material.current_stock ?? 0;
-    
-    if (type === 'deduct') {
-      newStock -= quantity;
-      // Cap at 0 to prevent negative stock
-      if (newStock < 0) newStock = 0;
-    } else if (type === 'add') {
-      newStock += quantity;
+export async function addRawMaterial(data: { name: string, unit: string, low_stock_threshold: number }) {
+  const prisma = getPrisma();
+  
+  const item = await prisma.rawMaterial.create({
+    data: {
+      name: data.name,
+      unit: data.unit,
+      current_stock: 0,
+      low_stock_threshold: data.low_stock_threshold
     }
-
-    await tx.rawMaterial.update({
-      where: { id: materialId },
-      data: { current_stock: newStock },
-    });
-
-    await tx.inventoryLog.create({
-      data: {
-        raw_material_id: materialId,
-        type,
-        quantity,
-        reason,
-      },
-    });
   });
 
   revalidatePath('/admin/inventory');
+  return { success: true, item };
+}
+
+export async function adjustStock(id: number, type: 'ADD' | 'REMOVE', quantity: number, reason: string) {
+  const prisma = getPrisma();
+  
+  const item = await prisma.rawMaterial.findUnique({ where: { id } });
+  if (!item) throw new Error("Item not found");
+
+  const newStock = type === 'ADD' ? (item.current_stock || 0) + quantity : (item.current_stock || 0) - quantity;
+
+  await prisma.rawMaterial.update({
+    where: { id },
+    data: { current_stock: newStock }
+  });
+
+  const adminUser = await prisma.user.findFirst({ where: { role: 'admin' } });
+  
+  await prisma.inventoryLog.create({
+    data: {
+      raw_material_id: id,
+      type,
+      quantity,
+      reason,
+      user_id: adminUser?.id || null // use dynamic admin id
+    }
+  });
+
+  await prisma.activityLog.create({
+    data: {
+      action: 'INVENTORY_ADJUSTED',
+      user_id: adminUser?.id || null,
+      details: JSON.stringify({ itemId: id, type, quantity, reason })
+    }
+  });
+
+  revalidatePath('/admin/inventory');
+  return { success: true };
 }

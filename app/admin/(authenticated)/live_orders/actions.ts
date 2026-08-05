@@ -29,11 +29,26 @@ export async function fetchLiveOrders() {
 export async function updateOrderStatus(orderId: number, status: string) {
   await getPrisma().order.update({
     where: { id: orderId },
-    data: { status },
+    data: { 
+      status,
+      has_new_items: false // Clear the new items flag when status changes
+    },
   });
   
-  // If order is completed or cancelled and associated with a table, we don't clear the table here
-  // Table session clearance logic happens when Invoice is generated or manually.
-  
+  revalidatePath('/admin/live_orders');
+}
+
+export async function fetchWaiterCalls() {
+  return await getPrisma().waiterCall.findMany({
+    where: { status: 'pending' },
+    orderBy: { created_at: 'asc' }
+  });
+}
+
+export async function acknowledgeWaiterCall(id: number) {
+  await getPrisma().waiterCall.update({
+    where: { id },
+    data: { status: 'resolved' }
+  });
   revalidatePath('/admin/live_orders');
 }
