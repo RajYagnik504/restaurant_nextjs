@@ -12,7 +12,7 @@ export function getPrisma() {
   // Optional: prevent schema parsing errors
   process.env.DATABASE_URL = connectionString;
   
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool);
+  const config = { connectionString };
+  const adapter = new PrismaNeon(config);
   return new PrismaClient({ adapter, log: ['warn', 'error'] });
 }
