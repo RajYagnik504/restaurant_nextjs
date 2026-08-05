@@ -31,7 +31,7 @@ export default async function InvoicesPage() {
               <tr key={invoice.id}>
                 <td><strong>INV-{invoice.id.toString().padStart(4, '0')}</strong></td>
                 <td>Order #{invoice.order_id}</td>
-                <td>{new Date(invoice.created_at).toLocaleString()}</td>
+                <td>{new Date(invoice.created_at || new Date()).toLocaleString()}</td>
                 <td><strong style={{ color: 'var(--success)' }}>₹{invoice.total.toFixed(2)}</strong></td>
                 <td><span className="badge badge-success">Paid ({invoice.payment_method})</span></td>
                 <td>

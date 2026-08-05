@@ -11,7 +11,13 @@ export async function addTable(formData: FormData) {
   if (isNaN(table_number)) throw new Error('Table number is required');
 
   await getPrisma().table.create({
-    data: { table_number, seats, status },
+    data: { 
+      table_number, 
+      seats, 
+      status,
+      name: `T${table_number}`,
+      branch_id: 1
+    },
   });
 
   revalidatePath('/admin/tables');

@@ -20,12 +20,13 @@ model Branch {
 }
 
 model Category {
-  id         Int        @id @default(autoincrement())
-  name       String     @db.VarChar(100)
-  name_hi    String?    @db.VarChar(150)
-  name_gu    String?    @db.VarChar(150)
-  sort_order Int        @default(0)
-  items      MenuItem[]
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(100)
+  name_hi     String?    @db.VarChar(150)
+  name_gu     String?    @db.VarChar(150)
+  description String?
+  sort_order  Int        @default(0)
+  items       MenuItem[]
 
   @@map("categories")
 }
@@ -42,6 +43,7 @@ model MenuItem {
   price        Float
   is_favorite  Boolean     @default(false)
   food_type    String?     @default("veg") @db.VarChar(20)
+  is_veg       Boolean     @default(false)
   short_code   String?     @db.VarChar(10)
   variant_name String?     @db.VarChar(50)
   is_combo     Boolean     @default(false)
@@ -56,6 +58,7 @@ model MenuItem {
 model Table {
   id                 Int       @id @default(autoincrement())
   branch_id          Int
+  table_number       Int       @default(1)
   name               String    @db.VarChar(20)
   section            String?   @default("Main") @db.VarChar(50)
   seats              Int?      @default(2)
